@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Options Academy — Learn Options Visually</title><!-- v1.1 -->
+<style>
+  :root{
+    --bg:#0f1117; --panel:#181b24; --panel2:#1f2330; --border:#2a2f3e;
+    --text:#e8eaf0; --muted:#9aa1b5; --accent:#5b8cff; --green:#34c98e;
+    --red:#ff6b6b; --amber:#ffb454; --purple:#b78cff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+  header{padding:18px 24px 8px; text-align:center;}
+  header h1{font-size:1.5rem; font-weight:700;}
+  header h1 span{color:var(--accent);}
+  header p{color:var(--muted); font-size:.85rem; margin-top:4px;}
+  nav{display:flex; justify-content:center; gap:8px; padding:14px; flex-wrap:wrap; position:sticky; top:0; background:rgba(15,17,23,.95); backdrop-filter:blur(6px); z-index:10; border-bottom:1px solid var(--border);}
+  nav button{background:var(--panel); color:var(--muted); border:1px solid var(--border); padding:9px 18px; border-radius:20px; cursor:pointer; font-size:.9rem; transition:.15s;}
+  nav button:hover{color:var(--text); border-color:var(--accent);}
+  nav button.active{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600;}
+  main{max-width:1000px; margin:0 auto; padding:20px 16px 60px;}
+  .tab{display:none;} .tab.show{display:block; animation:fade .25s;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1;}}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; margin-bottom:16px;}
+  .card h2{font-size:1.15rem; margin-bottom:10px;}
+  .card h3{font-size:.95rem; margin:12px 0 6px; color:var(--accent);}
+  .card p, .card li{color:var(--muted); line-height:1.6; font-size:.92rem;}
+  .card b{color:var(--text);}
+  .pill{display:inline-block; padding:2px 10px; border-radius:10px; font-size:.75rem; font-weight:600; margin-right:6px;}
+  .pill.g{background:rgba(52,201,142,.15); color:var(--green);}
+  .pill.r{background:rgba(255,107,107,.15); color:var(--red);}
+  .pill.b{background:rgba(91,140,255,.15); color:var(--accent);}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:760px){.two{grid-template-columns:1fr;}}
+  canvas{width:100%; border-radius:10px; background:var(--panel2);}
+  .controls{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-top:14px;}
+  .ctl label{display:flex; justify-content:space-between; font-size:.82rem; color:var(--muted); margin-bottom:4px;}
+  .ctl label output{color:var(--text); font-weight:600;}
+  input[type=range]{width:100%; accent-color:var(--accent); cursor:pointer;}
+  select{width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:9px; font-size:.9rem; cursor:pointer;}
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:14px;}
+  .stat{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; text-align:center;}
+  .stat .k{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+  .stat .v{font-size:1.05rem; font-weight:700; margin-top:2px;}
+  .green{color:var(--green);} .red{color:var(--red);} .amber{color:var(--amber);} .blue{color:var(--accent);} .purple{color:var(--purple);}
+  .explain{background:rgba(91,140,255,.08); border:1px solid rgba(91,140,255,.25); border-radius:10px; padding:12px 14px; margin-top:14px; font-size:.88rem; color:var(--muted); line-height:1.55;}
+  .explain b{color:var(--text);}
+  /* lessons */
+  .lesson-nav{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;}
+  .lesson-nav button{background:var(--panel2); border:1px solid var(--border); color:var(--muted); padding:7px 13px; border-radius:16px; cursor:pointer; font-size:.8rem;}
+  .lesson-nav button.active{background:var(--purple); color:#fff; border-color:var(--purple);}
+  .lesson{display:none;} .lesson.show{display:block; animation:fade .25s;}
+  .mini-demo{margin-top:14px;}
+  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:.85rem;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left; color:var(--muted);}
+  th{background:var(--panel2); color:var(--text);}
+  /* quiz */
+  .qopt{display:block; width:100%; text-align:left; background:var(--panel2); border:1px solid var(--border); color:var(--text); padding:13px 16px; border-radius:10px; margin:8px 0; cursor:pointer; font-size:.92rem; transition:.15s;}
+  .qopt:hover{border-color:var(--accent);}
+  .qopt.correct{background:rgba(52,201,142,.18); border-color:var(--green);}
+  .qopt.wrong{background:rgba(255,107,107,.18); border-color:var(--red);}
+  .qopt:disabled{cursor:default; opacity:.85;}
+  .feedback{margin-top:12px; padding:12px 14px; border-radius:10px; font-size:.9rem; line-height:1.5; display:none;}
+  .feedback.ok{display:block; background:rgba(52,201,142,.12); border:1px solid var(--green); color:var(--text);}
+  .feedback.no{display:block; background:rgba(255,107,107,.12); border:1px solid var(--red); color:var(--text);}
+  .btn{background:var(--accent); color:#fff; border:none; padding:11px 22px; border-radius:10px; font-size:.95rem; font-weight:600; cursor:pointer; margin-top:14px;}
+  .btn:hover{filter:brightness(1.1);}
+  .btn.ghost{background:var(--panel2); border:1px solid var(--border); color:var(--text);}
+  .progressbar{height:8px; background:var(--panel2); border-radius:4px; overflow:hidden; margin:10px 0;}
+  .progressbar div{height:100%; background:var(--accent); transition:width .3s;}
+  .scorebig{font-size:2.6rem; font-weight:800; text-align:center; margin:10px 0;}
+  .qtag{font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>📈 Options <span>Academy</span></h1>
+  <p>Learn options visually — lessons, interactive charts, and quizzes</p>
+</header>
+<nav>
+  <button class="active" data-tab="learn">📚 Learn</button>
+  <button data-tab="payoff">📊 Payoff Lab</button>
+  <button data-tab="greeks">🧮 Greeks Explorer</button>
+  <button data-tab="quiz">✅ Quiz Me</button>
+</nav>
+<main>
+
+<!-- ================= LEARN ================= -->
+<section class="tab show" id="tab-learn">
+  <div class="lesson-nav" id="lessonNav"></div>
+
+  <div class="lesson show" data-l="0">
+    <div class="card">
+      <h2>1 · What is an option?</h2>
+      <p>An option is a <b>contract</b> that gives you the <b>right — but not the obligation</b> — to buy or sell a stock at a fixed price (the <b>strike price</b>) before a deadline (the <b>expiration date</b>).</p>
+      <p style="margin-top:8px">Think of it like a <b>reservation with a deposit</b>: you pay a small fee (the <b>premium</b>) to lock in a price. If the deal turns out great, you use it. If not, you walk away and only lose the fee.</p>
+      <h3>The two types</h3>
+      <p><span class="pill b">CALL</span> the right to <b>BUY</b> at the strike price → you want the stock to go <b>UP</b> ⬆️</p>
+      <p style="margin-top:6px"><span class="pill r">PUT</span> the right to <b>SELL</b> at the strike price → you want the stock to go <b>DOWN</b> ⬇️</p>
+      <div class="explain">🧠 <b>Memory trick:</b> you <b>CALL</b> a stock up to you (buy), you <b>PUT</b> a stock down away from you (sell).</div>
+      <h3>Key terms in one picture</h3>
+      <table>
+        <tr><th>Term</th><th>Meaning</th><th>Analogy</th></tr>
+        <tr><td><b>Premium</b></td><td>Price you pay for the option</td><td>The deposit fee</td></tr>
+        <tr><td><b>Strike</b></td><td>The locked-in buy/sell price</td><td>The reserved price</td></tr>
+        <tr><td><b>Expiration</b></td><td>Deadline to use the option</td><td>Reservation expires</td></tr>
+        <tr><td><b>Exercise</b></td><td>Actually using your right</td><td>Claiming the reservation</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="lesson" data-l="1">
+    <div class="card">
+      <h2>2 · The Call option — interactive</h2>
+      <p>You buy a call on stock XYZ with <b>strike $100</b> for a <b>$5 premium</b>. Drag the slider to see where the stock ends up at expiration, and watch your profit.</p>
+      <div class="mini-demo">
+        <canvas id="demoCall" height="260"></canvas>
+        <div class="controls">
+          <div class="ctl">
+            <label>Stock price at expiration <output id="demoCallPriceOut">$100</output></label>
+            <input type="range" id="demoCallPrice" min="70" max="140" value="100" step="1">
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Your cost</div><div class="v red">−$5</div></div>
+          <div class="stat"><div class="k">Option worth</div><div class="v blue" id="demoCallVal">$0</div></div>
+          <div class="stat"><div class="k">Profit / Loss</div><div class="v" id="demoCallPL">−$5</div></div>
+        </div>
+        <div class="explain" id="demoCallExplain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lesson" data-l="2">
+    <div class="card">
+      <h2>3 · The Put option — interactive</h2>
+      <p>A put is <b>insurance</b>. You buy a put with <b>strike $100</b> for <b>$5</b>. It pays off when the stock <b>falls</b> below the strike. Drag the slider:</p>
+      <div class="mini-demo">
+        <canvas id="demoPut" height="260"></canvas>
+        <div class="controls">
+          <div class="ctl">
+            <label>Stock price at expiration <output id="demoPutPriceOut">$100</output></label>
+            <input type="range" id="demoPutPrice" min="60" max="130" value="100" step="1">
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Your cost</div><div class="v red">−$5</div></div>
+          <div class="stat"><div class="k">Option worth</div><div class="v blue" id="demoPutVal">$0</div></div>
+          <div class="stat"><div class="k">Profit / Loss</div><div class="v" id="demoPutPL">−$5</div></div>
+        </div>
+        <div class="explain" id="demoPutExplain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lesson" data-l="3">
+    <div class="card">
+      <h2>4 · Moneyness: ITM, ATM, OTM</h2>
+      <p>"Moneyness" describes where the stock price is <b>relative to the strike</b>. Drag the stock price and watch the labels:</p>
+      <div class="mini-demo">
+        <canvas id="demoMoney" height="200"></canvas>
+        <div class="controls">
+          <div class="ctl">
+            <label>Stock price <output id="demoMoneyOut">$100</output> (strike fixed at $100)</label>
+            <input type="range" id="demoMoneyPrice" min="70" max="130" value="100" step="1">
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Call ($100 strike) is</div><div class="v" id="moneyCall">ATM</div></div>
+          <div class="stat"><div class="k">Put ($100 strike) is</div><div class="v" id="moneyPut">ATM</div></div>
+        </div>
+      </div>
+      <table>
+        <tr><th></th><th>Call</th><th>Put</th></tr>
+        <tr><td><b>In the money (ITM)</b> — has real value now</td><td>Stock <b>above</b> strike</td><td>Stock <b>below</b> strike</td></tr>
+        <tr><td><b>At the money (ATM)</b></td><td colspan="2">Stock ≈ strike</td></tr>
+        <tr><td><b>Out of the money (OTM)</b> — worthless if expired now</td><td>Stock <b>below</b> strike</td><td>Stock <b>above</b> strike</td></tr>
+      </table>
+      <div class="explain">💡 OTM options are cheaper (like lottery tickets), ITM options cost more but are more likely to pay off.</div>
+    </div>
+  </div>
+
+  <div class="lesson" data-l="4">
+    <div class="card">
+      <h2>5 · Buyers vs. Sellers</h2>
+      <p>Every option has two sides. The <b>buyer</b> pays the premium and gets the right. The <b>seller</b> (or "writer") collects the premium and takes on the <b>obligation</b>.</p>
+      <table>
+        <tr><th></th><th>Buyer (long)</th><th>Seller (short)</th></tr>
+        <tr><td>Pays/receives premium</td><td class="red">Pays</td><td class="green">Receives</td></tr>
+        <tr><td>Max loss</td><td><b>Premium only</b> (limited)</td><td>Can be <b>large or unlimited</b></td></tr>
+        <tr><td>Max gain</td><td>Large (call: unlimited)</td><td><b>Premium only</b> (limited)</td></tr>
+        <tr><td>Wants</td><td>Big moves</td><td>Nothing to happen</td></tr>
+      </table>
+      <div class="explain">⚠️ <b>Selling a "naked" call has unlimited risk</b> — the stock can rise forever. This is why beginners should start by buying options or selling covered ones. Compare both sides visually in the Payoff Lab.</div>
+    </div>
+  </div>
+
+  <div class="lesson" data-l="5">
+    <div class="card">
+      <h2>6 · Why options lose value over time (Theta)</h2>
+      <p>An option's premium = <b>intrinsic value</b> (real value right now) + <b>time value</b> (the "hope" that things improve before expiry).</p>
+      <p style="margin-top:8px">Time value <b>melts away</b> every day — faster as expiration approaches. This decay is called <b>theta</b>. Drag the slider to watch an at-the-money option's value melt:</p>
+      <div class="mini-demo">
+        <canvas id="demoTheta" height="240"></canvas>
+        <div class="controls">
+          <div class="ctl">
+            <label>Days until expiration <output id="demoThetaOut">60</output></label>
+            <input type="range" id="demoThetaDays" min="0" max="90" value="60" step="1">
+          </div>
+        </div>
+        <div class="explain">🧊 An option is a <b>melting ice cube</b>. Notice the curve gets steeper near zero — the last 2 weeks melt fastest. Buyers fight the clock; sellers profit from it.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lesson" data-l="6">
+    <div class="card">
+      <h2>7 · Volatility — the price of uncertainty</h2>
+      <p><b>Volatility</b> is how wildly a stock swings. More swing = more chance of a big payoff = <b>more expensive options</b> (both calls and puts).</p>
+      <p style="margin-top:8px"><b>Implied volatility (IV)</b> is the market's guess of future swings, baked into the premium. When fear or excitement rises (e.g., before earnings), IV rises and options get pricier — even if the stock hasn't moved.</p>
+      <div class="explain">📌 <b>Key trap for beginners:</b> buying a call right before earnings, the stock goes up… and you still lose money. Why? IV collapses after the announcement ("IV crush") and that drop can outweigh the stock move. Play with the Vol slider in the Greeks Explorer to feel this.</div>
+    </div>
+  </div>
+
+  <div class="lesson" data-l="7">
+    <div class="card">
+      <h2>8 · Where to go next</h2>
+      <p>You now know the core: <b>calls, puts, premium, strike, moneyness, time decay, volatility</b>. Suggested path:</p>
+      <p style="margin-top:8px">1️⃣ Go to the <b>Payoff Lab</b> and study these in order: Long Call → Long Put → Short Put → Covered Call → Bull Call Spread → Straddle.<br>
+      2️⃣ Open the <b>Greeks Explorer</b> and move one slider at a time. Watch the price line, then read what each Greek did.<br>
+      3️⃣ <b>Quiz yourself</b> until you score 80%+.</p>
+      <div class="explain">🎓 Rule of thumb when reading any payoff diagram: find where the line crosses zero (<b>breakeven</b>), the lowest point (<b>max loss</b>), and the highest point (<b>max profit</b>). Those three numbers tell the whole story.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PAYOFF LAB ================= -->
+<section class="tab" id="tab-payoff">
+  <div class="card">
+    <h2>📊 Payoff Lab — profit/loss at expiration</h2>
+    <p>Pick a strategy, adjust the sliders, and see the P/L line. <span class="green">Green</span> = profit zone, <span class="red">red</span> = loss zone. Dashed line = breakeven.</p>
+    <div class="controls" style="margin-top:14px">
+      <div class="ctl">
+        <label>Strategy</label>
+        <select id="strat"></select>
+      </div>
+      <div class="ctl" id="k1Wrap">
+        <label>Strike 1 <output id="k1Out"></output></label>
+        <input type="range" id="k1" min="80" max="120" value="100" step="1">
+      </div>
+      <div class="ctl" id="k2Wrap" style="display:none">
+        <label>Strike 2 <output id="k2Out"></output></label>
+        <input type="range" id="k2" min="81" max="130" value="110" step="1">
+      </div>
+      <div class="ctl">
+        <label>Premium per option <output id="premOut"></output></label>
+        <input type="range" id="prem" min="1" max="15" value="5" step="0.5">
+      </div>
+      <div class="ctl">
+        <label>"What if" stock price <output id="spotOut"></output></label>
+        <input type="range" id="spot" min="60" max="150" value="100" step="1">
+      </div>
+    </div>
+    <canvas id="payoffChart" height="340" style="margin-top:16px"></canvas>
+    <div class="stats">
+      <div class="stat"><div class="k">P/L at "what if" price</div><div class="v" id="plAtSpot">—</div></div>
+      <div class="stat"><div class="k">Breakeven</div><div class="v amber" id="bePoint">—</div></div>
+      <div class="stat"><div class="k">Max profit</div><div class="v green" id="maxP">—</div></div>
+      <div class="stat"><div class="k">Max loss</div><div class="v red" id="maxL">—</div></div>
+    </div>
+    <div class="explain" id="stratExplain"></div>
+  </div>
+</section>
+
+<!-- ================= GREEKS ================= -->
+<section class="tab" id="tab-greeks">
+  <div class="card">
+    <h2>🧮 Greeks Explorer</h2>
+    <p>The Greeks measure how an option's <b>price</b> reacts to changes. Move one slider at a time and watch the curve and numbers. The chart shows the option's value today (solid) vs. its value at expiration (dashed) — the gap between them is <b>time value</b>.</p>
+    <div class="controls" style="margin-top:14px">
+      <div class="ctl">
+        <label>Option type</label>
+        <select id="gType"><option value="call">Call</option><option value="put">Put</option></select>
+      </div>
+      <div class="ctl">
+        <label>Stock price <output id="gSpotOut">$100</output></label>
+        <input type="range" id="gSpot" min="70" max="130" value="100" step="1">
+      </div>
+      <div class="ctl">
+        <label>Strike <output id="gStrikeOut">$100</output></label>
+        <input type="range" id="gStrike" min="80" max="120" value="100" step="1">
+      </div>
+      <div class="ctl">
+        <label>Days to expiration <output id="gDaysOut">45</output></label>
+        <input type="range" id="gDays" min="1" max="180" value="45" step="1">
+      </div>
+      <div class="ctl">
+        <label>Implied volatility <output id="gVolOut">30%</output></label>
+        <input type="range" id="gVol" min="5" max="100" value="30" step="1">
+      </div>
+    </div>
+    <canvas id="greekChart" height="320" style="margin-top:16px"></canvas>
+    <div class="stats">
+      <div class="stat"><div class="k">Option price</div><div class="v blue" id="gPrice">—</div></div>
+      <div class="stat"><div class="k">Delta Δ</div><div class="v" id="gDelta">—</div></div>
+      <div class="stat"><div class="k">Gamma Γ</div><div class="v purple" id="gGamma">—</div></div>
+      <div class="stat"><div class="k">Theta Θ /day</div><div class="v red" id="gTheta">—</div></div>
+      <div class="stat"><div class="k">Vega /1% vol</div><div class="v amber" id="gVega">—</div></div>
+    </div>
+    <div class="explain" id="greekExplain"></div>
+  </div>
+  <div class="two">
+    <div class="card"><h3 style="margin-top:0">Δ Delta — speed</h3><p>How much the option price moves per <b>$1</b> stock move. Δ 0.60 → option gains ~$0.60 when stock gains $1. Also a rough <b>probability of finishing ITM</b>.</p></div>
+    <div class="card"><h3 style="margin-top:0">Γ Gamma — acceleration</h3><p>How fast <b>delta itself</b> changes. Highest at-the-money near expiry — that's where option prices behave most explosively.</p></div>
+    <div class="card"><h3 style="margin-top:0">Θ Theta — the melting clock</h3><p>Value lost <b>per day</b> from time decay. Always works against buyers, for sellers. Accelerates near expiration.</p></div>
+    <div class="card"><h3 style="margin-top:0">V Vega — the fear gauge</h3><p>Price change per <b>1% change in implied volatility</b>. Long options gain when markets get nervous, lose when calm returns (IV crush).</p></div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="tab" id="tab-quiz">
+  <div class="card" id="quizCard">
+    <h2>✅ Quiz Me</h2>
+    <p id="quizIntro">10 random questions from a pool of 24. Answer, read the explanation, then continue. Ready?</p>
+    <div id="quizBody" style="display:none">
+      <div class="progressbar"><div id="qProg" style="width:0%"></div></div>
+      <p class="qtag" id="qCount"></p>
+      <h3 id="qText" style="color:var(--text); font-size:1.05rem; margin-top:6px"></h3>
+      <div id="qOpts"></div>
+      <div class="feedback" id="qFeed"></div>
+      <button class="btn" id="qNext" style="display:none">Next question →</button>
+    </div>
+    <div id="quizResult" style="display:none">
+      <div class="scorebig" id="qScore"></div>
+      <p id="qVerdict" style="text-align:center"></p>
+      <div style="text-align:center"><button class="btn" id="qRestart">Try again 🔄</button></div>
+    </div>
+    <button class="btn" id="qStart">Start quiz</button>
+  </div>
+</section>
+
+</main>
+<script>
+/* ============ NAV ============ */
+const tabs = document.querySelectorAll('nav button');
+tabs.forEach(b=>b.onclick=()=>{
+  tabs.forEach(x=>x.classList.remove('active')); b.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('show'));
+  document.getElementById('tab-'+b.dataset.tab).classList.add('show');
+  if(b.dataset.tab==='payoff') drawPayoff();
+  if(b.dataset.tab==='greeks') drawGreeks();
+  if(b.dataset.tab==='learn') redrawActiveLesson();
+});
+function redrawActiveLesson(){
+  const l=document.querySelector('.lesson.show'); if(!l)return;
+  const i=+l.dataset.l;
+  if(i===1)drawDemoCall(); else if(i===2)drawDemoPut(); else if(i===3)drawMoney(); else if(i===5)drawTheta();
+}
+
+/* lesson nav */
+const lessonTitles=['Basics','Calls','Puts','Moneyness','Buy vs Sell','Time decay','Volatility','Next steps'];
+const lnav=document.getElementById('lessonNav');
+lessonTitles.forEach((t,i)=>{
+  const b=document.createElement('button'); b.textContent=(i+1)+'. '+t;
+  if(i===0)b.classList.add('active');
+  b.onclick=()=>{
+    lnav.querySelectorAll('button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    document.querySelectorAll('.lesson').forEach(l=>l.classList.toggle('show', l.dataset.l==i));
+    if(i===1)drawDemoCall(); if(i===2)drawDemoPut(); if(i===3)drawMoney(); if(i===5)drawTheta();
+  };
+  lnav.appendChild(b);
+});
+
+/* ============ CANVAS HELPERS ============ */
+function setupCanvas(c){
+  const dpr=window.devicePixelRatio||1;
+  /* cache the design height ONCE — setting c.height below overwrites the
+     height attribute, so re-reading it each draw would compound by dpr
+     every redraw (canvas grows on each slider tick at 125%/150% display
+     scaling, making the page jump while dragging) */
+  if(!c.dataset.baseH) c.dataset.baseH=parseInt(c.getAttribute('height'))||300;
+  const h=+c.dataset.baseH;
+  c.style.height=h+'px';
+  const w=c.clientWidth||c.parentElement.clientWidth||600;
+  c.width=Math.round(w*dpr); c.height=Math.round(h*dpr);
+  const ctx=c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+/* Generic payoff plotter: data = fn(price)->P/L */
+function plotPL(canvasId, fn, xMin, xMax, marks={}){
+  const c=document.getElementById(canvasId); if(!c)return;
+  const {ctx,w,h}=setupCanvas(c);
+  const padL=52,padR=16,padT=18,padB=30;
+  const pw=w-padL-padR, ph=h-padT-padB;
+  // sample
+  const N=240, xs=[],ys=[];
+  let yMin=0,yMax=0;
+  for(let i=0;i<=N;i++){const x=xMin+(xMax-xMin)*i/N; const y=fn(x); xs.push(x);ys.push(y); yMin=Math.min(yMin,y); yMax=Math.max(yMax,y);}
+  const pad=(yMax-yMin)*0.15||5; yMin-=pad; yMax+=pad;
+  const X=x=>padL+(x-xMin)/(xMax-xMin)*pw;
+  const Y=y=>padT+(yMax-y)/(yMax-yMin)*ph;
+  ctx.clearRect(0,0,w,h);
+  // grid
+  ctx.strokeStyle=css('--border'); ctx.lineWidth=1; ctx.font='11px Segoe UI'; ctx.fillStyle=css('--muted');
+  const ySteps=5;
+  for(let i=0;i<=ySteps;i++){
+    const yv=yMin+(yMax-yMin)*i/ySteps, yp=Y(yv);
+    ctx.beginPath(); ctx.moveTo(padL,yp); ctx.lineTo(w-padR,yp); ctx.stroke();
+    ctx.textAlign='right'; ctx.fillText('$'+yv.toFixed(0), padL-6, yp+4);
+  }
+  const xSteps=6;
+  for(let i=0;i<=xSteps;i++){
+    const xv=xMin+(xMax-xMin)*i/xSteps;
+    ctx.textAlign='center'; ctx.fillText('$'+xv.toFixed(0), X(xv), h-10);
+  }
+  // zero line
+  if(yMin<0&&yMax>0){ctx.strokeStyle=css('--muted'); ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(padL,Y(0)); ctx.lineTo(w-padR,Y(0)); ctx.stroke();}
+  // fill profit/loss areas
+  ctx.save(); ctx.beginPath(); ctx.rect(padL,padT,pw,ph); ctx.clip();
+  const y0=Y(Math.max(Math.min(0,yMax),yMin));
+  // green fill
+  ctx.beginPath(); ctx.moveTo(X(xs[0]),y0);
+  xs.forEach((x,i)=>ctx.lineTo(X(x),Y(Math.max(ys[i],0))));
+  ctx.lineTo(X(xs[N]),y0); ctx.closePath();
+  ctx.fillStyle='rgba(52,201,142,.13)'; ctx.fill();
+  // red fill
+  ctx.beginPath(); ctx.moveTo(X(xs[0]),y0);
+  xs.forEach((x,i)=>ctx.lineTo(X(x),Y(Math.min(ys[i],0))));
+  ctx.lineTo(X(xs[N]),y0); ctx.closePath();
+  ctx.fillStyle='rgba(255,107,107,.13)'; ctx.fill();
+  // P/L line — color by sign
+  for(let i=0;i<N;i++){
+    ctx.beginPath(); ctx.moveTo(X(xs[i]),Y(ys[i])); ctx.lineTo(X(xs[i+1]),Y(ys[i+1]));
+    ctx.strokeStyle=(ys[i]+ys[i+1])/2>=0?css('--green'):css('--red');
+    ctx.lineWidth=2.6; ctx.stroke();
+  }
+  // breakeven dashed verticals
+  (marks.be||[]).forEach(b=>{
+    ctx.setLineDash([5,5]); ctx.strokeStyle=css('--amber'); ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.moveTo(X(b),padT); ctx.lineTo(X(b),padT+ph); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=css('--amber'); ctx.textAlign='center'; ctx.fillText('BE $'+b.toFixed(1), X(b), padT-4);
+  });
+  // strikes
+  (marks.strikes||[]).forEach(k=>{
+    ctx.setLineDash([2,4]); ctx.strokeStyle=css('--accent'); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(X(k),padT); ctx.lineTo(X(k),padT+ph); ctx.stroke(); ctx.setLineDash([]);
+  });
+  // spot marker dot
+  if(marks.spot!==undefined){
+    const sy=fn(marks.spot);
+    ctx.beginPath(); ctx.arc(X(marks.spot),Y(sy),6,0,7);
+    ctx.fillStyle=sy>=0?css('--green'):css('--red'); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ============ LESSON DEMOS ============ */
+function fmtPL(v){return (v>=0?'+$':'−$')+Math.abs(v).toFixed(2);}
+function plClass(el,v){el.className='v '+(v>0?'green':v<0?'red':'');}
+
+function drawDemoCall(){
+  const S=+document.getElementById('demoCallPrice').value;
+  document.getElementById('demoCallPriceOut').textContent='$'+S;
+  const K=100,P=5, val=Math.max(S-K,0), pl=val-P;
+  plotPL('demoCall',x=>Math.max(x-K,0)-P,70,140,{be:[K+P],strikes:[K],spot:S});
+  document.getElementById('demoCallVal').textContent='$'+val.toFixed(0);
+  const plEl=document.getElementById('demoCallPL'); plEl.textContent=fmtPL(pl); plClass(plEl,pl);
+  const ex=document.getElementById('demoCallExplain');
+  if(S<=K) ex.innerHTML=`Stock at $${S} is <b>below the $100 strike</b> — why buy at $100 when the market is cheaper? The option expires worthless and you lose the $5 premium. <b>That's your maximum possible loss.</b>`;
+  else if(pl<0) ex.innerHTML=`Stock is above the strike, so the option is worth $${val} (buy at $100, sell at $${S}). But you paid $5 for it — you're still down ${fmtPL(pl)}. You need the stock above the <b>breakeven of $105</b> (strike + premium) to profit.`;
+  else ex.innerHTML=`🎉 Stock at $${S}: you can buy at $100 and sell at $${S}. After the $5 premium, profit = ${fmtPL(pl)}. Above breakeven, every extra $1 in the stock = +$1 profit. <b>Upside is unlimited.</b>`;
+}
+document.getElementById('demoCallPrice').oninput=drawDemoCall;
+
+function drawDemoPut(){
+  const S=+document.getElementById('demoPutPrice').value;
+  document.getElementById('demoPutPriceOut').textContent='$'+S;
+  const K=100,P=5, val=Math.max(K-S,0), pl=val-P;
+  plotPL('demoPut',x=>Math.max(K-x,0)-P,60,130,{be:[K-P],strikes:[K],spot:S});
+  document.getElementById('demoPutVal').textContent='$'+val.toFixed(0);
+  const plEl=document.getElementById('demoPutPL'); plEl.textContent=fmtPL(pl); plClass(plEl,pl);
+  const ex=document.getElementById('demoPutExplain');
+  if(S>=K) ex.innerHTML=`Stock at $${S} is <b>at or above the strike</b> — selling at $100 is no better than the market. The put expires worthless; you lose the $5 premium. Like insurance you never needed to claim.`;
+  else if(pl<0) ex.innerHTML=`The stock dropped, so your right to sell at $100 is worth $${val}. Still less than the $5 you paid. You need the stock <b>below breakeven $95</b> (strike − premium) to profit.`;
+  else ex.innerHTML=`🎉 Stock fell to $${S}: you can sell at $100 what the market values at $${S}. Profit after premium: ${fmtPL(pl)}. The lower it goes, the more you make (max at stock = $0).`;
+}
+document.getElementById('demoPutPrice').oninput=drawDemoPut;
+
+function drawMoney(){
+  const S=+document.getElementById('demoMoneyPrice').value;
+  document.getElementById('demoMoneyOut').textContent='$'+S;
+  const c=document.getElementById('demoMoney'); const {ctx,w,h}=setupCanvas(c);
+  ctx.clearRect(0,0,w,h);
+  const pad=40, lineY=h/2, xMin=70,xMax=130;
+  const X=x=>pad+(x-xMin)/(xMax-xMin)*(w-2*pad);
+  // zones for a CALL
+  ctx.fillStyle='rgba(255,107,107,.12)'; ctx.fillRect(pad,lineY-34,X(100)-pad,68);
+  ctx.fillStyle='rgba(52,201,142,.12)'; ctx.fillRect(X(100),lineY-34,w-pad-X(100),68);
+  ctx.font='12px Segoe UI'; ctx.textAlign='center';
+  ctx.fillStyle=css('--red'); ctx.fillText('CALL is OTM here',(pad+X(100))/2,lineY-44);
+  ctx.fillStyle=css('--green'); ctx.fillText('CALL is ITM here',(X(100)+w-pad)/2,lineY-44);
+  // axis
+  ctx.strokeStyle=css('--muted'); ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(pad,lineY); ctx.lineTo(w-pad,lineY); ctx.stroke();
+  for(let p=70;p<=130;p+=10){ctx.fillStyle=css('--muted'); ctx.fillText('$'+p,X(p),lineY+50);
+    ctx.beginPath(); ctx.moveTo(X(p),lineY-4); ctx.lineTo(X(p),lineY+4); ctx.stroke();}
+  // strike
+  ctx.strokeStyle=css('--accent'); ctx.lineWidth=2; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(X(100),lineY-34); ctx.lineTo(X(100),lineY+34); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=css('--accent'); ctx.fillText('Strike $100',X(100),lineY+34+14);
+  // stock dot
+  ctx.beginPath(); ctx.arc(X(S),lineY,8,0,7); ctx.fillStyle=css('--amber'); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle=css('--amber'); ctx.fillText('Stock $'+S,X(S),lineY-16);
+  const cm=document.getElementById('moneyCall'), pm=document.getElementById('moneyPut');
+  const set=(el,t)=>{el.textContent=t; el.className='v '+(t==='ITM 💰'?'green':t==='OTM'?'red':'amber');};
+  if(S>100){set(cm,'ITM 💰');set(pm,'OTM');}
+  else if(S<100){set(cm,'OTM');set(pm,'ITM 💰');}
+  else{set(cm,'ATM');set(pm,'ATM');}
+}
+document.getElementById('demoMoneyPrice').oninput=drawMoney;
+
+function drawTheta(){
+  const days=+document.getElementById('demoThetaDays').value;
+  document.getElementById('demoThetaOut').textContent=days;
+  const c=document.getElementById('demoTheta'); const {ctx,w,h}=setupCanvas(c);
+  ctx.clearRect(0,0,w,h);
+  const padL=46,padR=16,padT=16,padB=30, pw=w-padL-padR, ph=h-padT-padB;
+  const maxD=90;
+  const val=d=>bs(100,100,Math.max(d,0.01)/365,0.3,'call').price;
+  const vMax=val(maxD)*1.1;
+  const X=d=>padL+(maxD-d)/maxD*pw; // time flows left->right toward expiry
+  const Y=v=>padT+(vMax-v)/vMax*ph;
+  ctx.strokeStyle=css('--border'); ctx.font='11px Segoe UI'; ctx.fillStyle=css('--muted');
+  for(let i=0;i<=4;i++){const v=vMax*i/4, yp=Y(v);
+    ctx.beginPath(); ctx.moveTo(padL,yp); ctx.lineTo(w-padR,yp); ctx.stroke();
+    ctx.textAlign='right'; ctx.fillText('$'+v.toFixed(1),padL-6,yp+4);}
+  [90,60,30,14,0].forEach(d=>{ctx.textAlign='center'; ctx.fillText(d+'d',X(d),h-10);});
+  // curve
+  ctx.beginPath();
+  for(let d=maxD;d>=0;d-=0.5){const v=val(d); d===maxD?ctx.moveTo(X(d),Y(v)):ctx.lineTo(X(d),Y(v));}
+  ctx.strokeStyle=css('--purple'); ctx.lineWidth=2.6; ctx.stroke();
+  // marker
+  const v=val(days);
+  ctx.beginPath(); ctx.arc(X(days),Y(v),7,0,7); ctx.fillStyle=css('--purple'); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle=css('--text'); ctx.textAlign='center'; ctx.font='bold 13px Segoe UI';
+  ctx.fillText('worth $'+v.toFixed(2),X(days),Y(v)-14);
+}
+document.getElementById('demoThetaDays').oninput=drawTheta;
+
+/* ============ BLACK-SCHOLES ============ */
+function normCdf(x){const t=1/(1+0.2316419*Math.abs(x));
+  const d=0.3989423*Math.exp(-x*x/2);
+  let p=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));
+  return x>0?1-p:p;}
+function normPdf(x){return Math.exp(-x*x/2)/Math.sqrt(2*Math.PI);}
+function bs(S,K,T,vol,type,r=0.02){
+  T=Math.max(T,1e-6); vol=Math.max(vol,1e-6);
+  const d1=(Math.log(S/K)+(r+vol*vol/2)*T)/(vol*Math.sqrt(T));
+  const d2=d1-vol*Math.sqrt(T);
+  const call=S*normCdf(d1)-K*Math.exp(-r*T)*normCdf(d2);
+  const put=call-S+K*Math.exp(-r*T);
+  const price=type==='call'?call:put;
+  const delta=type==='call'?normCdf(d1):normCdf(d1)-1;
+  const gamma=normPdf(d1)/(S*vol*Math.sqrt(T));
+  const vega=S*normPdf(d1)*Math.sqrt(T)/100;
+  let theta=-(S*normPdf(d1)*vol)/(2*Math.sqrt(T)) - (type==='call'?1:-1)*r*K*Math.exp(-r*T)*normCdf((type==='call'?1:-1)*d2);
+  theta/=365;
+  return {price,delta,gamma,vega,theta};
+}
+
+/* ============ PAYOFF LAB ============ */
+const strategies={
+  longCall:{name:'Long Call (buy a call)',legs:1,
+    fn:(x,k1,k2,p)=>Math.max(x-k1,0)-p,
+    maxP:()=>'Unlimited ⬆️', maxL:(k1,k2,p)=>-p,
+    text:'The classic <b>bullish bet</b>. Risk only the premium; unlimited upside. Needs the stock above strike + premium by expiry. Beginner-friendly.'},
+  longPut:{name:'Long Put (buy a put)',legs:1,
+    fn:(x,k1,k2,p)=>Math.max(k1-x,0)-p,
+    maxP:(k1,k2,p)=>k1-p, maxL:(k1,k2,p)=>-p,
+    text:'The <b>bearish bet</b> or portfolio <b>insurance</b>. Profits as the stock falls below strike − premium. Max profit if stock hits $0.'},
+  shortCall:{name:'Short Call (sell a naked call) ⚠️',legs:1,
+    fn:(x,k1,k2,p)=>p-Math.max(x-k1,0),
+    maxP:(k1,k2,p)=>p, maxL:()=>'Unlimited ⚠️',
+    text:'You collect the premium and profit if the stock stays <b>below the strike</b>. But losses are <b>unlimited</b> if it rallies. Notice this chart is the exact mirror of the Long Call — every option trade has a winner and a loser.'},
+  shortPut:{name:'Short Put (sell a put)',legs:1,
+    fn:(x,k1,k2,p)=>p-Math.max(k1-x,0),
+    maxP:(k1,k2,p)=>p, maxL:(k1,k2,p)=>-(k1-p),
+    text:'You get paid to <b>promise to buy</b> the stock at the strike. Common way to acquire stock at a discount. Profitable if the stock stays above strike − premium; big (not unlimited) loss if it crashes.'},
+  coveredCall:{name:'Covered Call (own stock at $100 + sell call)',legs:1,
+    fn:(x,k1,k2,p)=>(x-100)+p-Math.max(x-k1,0),
+    maxP:(k1,k2,p)=>k1-100+p, maxL:(k1,k2,p)=>-(100-p),
+    text:'You own stock (bought at $100) and sell a call against it for <b>income</b>. The premium cushions small drops, but you give up gains above the strike. Tip: if you set the strike below $100 − premium, max profit goes negative — you\'ve locked in a loss. Popular income strategy when the strike is above your cost.'},
+  bullCallSpread:{name:'Bull Call Spread (buy K1 call, sell K2 call)',legs:2,
+    fn:(x,k1,k2,p)=>Math.max(x-k1,0)-Math.max(x-k2,0)-p,
+    maxP:(k1,k2,p)=>k2-k1-p, maxL:(k1,k2,p)=>-p,
+    text:'A <b>cheaper bullish bet</b>: buy a call at K1, sell one at K2 to offset cost (the premium slider = net cost). Both profit and loss are capped. Tip: if net cost exceeds the distance between strikes, profit becomes impossible — watch Max Profit turn red.'},
+  bearPutSpread:{name:'Bear Put Spread (buy K2 put, sell K1 put)',legs:2,
+    fn:(x,k1,k2,p)=>Math.max(k2-x,0)-Math.max(k1-x,0)-p,
+    maxP:(k1,k2,p)=>k2-k1-p, maxL:(k1,k2,p)=>-p,
+    text:'The bearish twin of the bull call spread: capped cost, capped profit, profits on a <b>moderate decline</b> below K2 − net premium.'},
+  straddle:{name:'Long Straddle (buy call + put, same strike)',legs:1,
+    fn:(x,k1,k2,p)=>Math.max(x-k1,0)+Math.max(k1-x,0)-2*p,
+    maxP:()=>'Unlimited ⬆️', maxL:(k1,k2,p)=>-2*p,
+    text:'A <b>volatility bet</b> — you don\'t care which direction, you just need a <b>big move</b>. You pay two premiums, so the stock must move beyond strike ± both premiums. Loses if the stock sits still.'},
+  strangle:{name:'Long Strangle (buy OTM put K1 + OTM call K2)',legs:2,
+    fn:(x,k1,k2,p)=>Math.max(k1-x,0)+Math.max(x-k2,0)-2*p,
+    maxP:()=>'Unlimited ⬆️', maxL:(k1,k2,p)=>-2*p,
+    text:'Like a straddle but using cheaper OTM strikes — costs less, but needs an even <b>bigger move</b> to pay off.'},
+  ironCondorish:{name:'Short Straddle (sell call + put) ⚠️',legs:1,
+    fn:(x,k1,k2,p)=>2*p-Math.max(x-k1,0)-Math.max(k1-x,0),
+    maxP:(k1,k2,p)=>2*p, maxL:()=>'Unlimited ⚠️',
+    text:'You collect two premiums betting the stock <b>goes nowhere</b>. Profitable in the calm zone between breakevens, but unlimited risk on a big move. The "picking up pennies in front of a steamroller" trade.'},
+};
+const stratSel=document.getElementById('strat');
+Object.entries(strategies).forEach(([k,v])=>{const o=document.createElement('option'); o.value=k; o.textContent=v.name; stratSel.appendChild(o);});
+
+function money(v){return (v<0?'−$':'+$')+Math.abs(v).toFixed(2);}
+/* find breakevens numerically: scan the curve for zero crossings */
+function findBreakevens(fn,xMin,xMax){
+  const be=[]; const step=0.25;
+  let px=xMin, pv=fn(xMin);
+  for(let x=xMin+step; x<=xMax+1e-9; x+=step){
+    const v=fn(x);
+    if((pv<0&&v>=0)||(pv>0&&v<=0)){
+      const t=pv/(pv-v); be.push(px+step*t);
+    }
+    px=x; pv=v;
+  }
+  return be.filter((b,i)=>i===0||b-be[i-1]>0.5);
+}
+function drawPayoff(e){
+  const s=strategies[stratSel.value];
+  const src=e&&e.target?e.target.id:'';
+  const k1El=document.getElementById('k1'), k2El=document.getElementById('k2');
+  let k1=+k1El.value, k2=+k2El.value;
+  document.getElementById('k2Wrap').style.display=s.legs===2?'':'none';
+  if(s.legs===2&&k2<=k1){
+    /* push the OTHER slider so the one being dragged never fights the user */
+    if(src==='k2'){k1=k2-1; k1El.value=k1;}
+    else{k2=Math.min(k1+1,130); k2El.value=k2; if(k2<=k1){k1=k2-1; k1El.value=k1;}}
+  }
+  const p=+document.getElementById('prem').value;
+  const spot=+document.getElementById('spot').value;
+  document.getElementById('k1Out').textContent='$'+k1;
+  document.getElementById('k2Out').textContent='$'+k2;
+  document.getElementById('premOut').textContent='$'+p.toFixed(2);
+  document.getElementById('spotOut').textContent='$'+spot;
+  const fn=x=>s.fn(x,k1,k2,p);
+  const be=findBreakevens(fn,60,150);
+  plotPL('payoffChart',fn,60,150,{be,strikes:s.legs===2?[k1,k2]:[k1],spot});
+  const pl=fn(spot);
+  const plEl=document.getElementById('plAtSpot'); plEl.textContent=fmtPL(pl); plClass(plEl,pl);
+  document.getElementById('bePoint').textContent=be.length?be.map(b=>'$'+b.toFixed(1)).join(' & '):'—';
+  const mp=s.maxP(k1,k2,p), ml=s.maxL(k1,k2,p);
+  const mpEl=document.getElementById('maxP'), mlEl=document.getElementById('maxL');
+  mpEl.textContent=typeof mp==='number'?money(mp):mp;
+  mpEl.className='v '+(typeof mp==='number'&&mp<0?'red':'green');
+  mlEl.textContent=typeof ml==='number'?money(ml):ml;
+  mlEl.className='v '+(typeof ml==='number'&&ml>0?'green':'red');
+  document.getElementById('stratExplain').innerHTML='💡 '+s.text;
+}
+['strat','k1','k2','prem','spot'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('input',drawPayoff);
+  el.addEventListener('change',drawPayoff);
+});
+
+/* ============ GREEKS ============ */
+function drawGreeks(){
+  const type=document.getElementById('gType').value;
+  const S=+document.getElementById('gSpot').value;
+  const K=+document.getElementById('gStrike').value;
+  const days=+document.getElementById('gDays').value;
+  const vol=+document.getElementById('gVol').value/100;
+  document.getElementById('gSpotOut').textContent='$'+S;
+  document.getElementById('gStrikeOut').textContent='$'+K;
+  document.getElementById('gDaysOut').textContent=days;
+  document.getElementById('gVolOut').textContent=Math.round(vol*100)+'%';
+  const T=days/365;
+  const g=bs(S,K,T,vol,type);
+  document.getElementById('gPrice').textContent='$'+g.price.toFixed(2);
+  const dEl=document.getElementById('gDelta'); dEl.textContent=g.delta.toFixed(2); dEl.className='v '+(g.delta>=0?'green':'red');
+  document.getElementById('gGamma').textContent=g.gamma.toFixed(3);
+  document.getElementById('gTheta').textContent='−$'+Math.abs(g.theta).toFixed(3);
+  document.getElementById('gVega').textContent='$'+g.vega.toFixed(3);
+  // chart: option value today vs payoff at expiry, across stock prices
+  const c=document.getElementById('greekChart'); const {ctx,w,h}=setupCanvas(c);
+  ctx.clearRect(0,0,w,h);
+  const padL=52,padR=16,padT=18,padB=30, pw=w-padL-padR, ph=h-padT-padB;
+  const xMin=60,xMax=140;
+  const todayV=x=>bs(x,K,T,vol,type).price;
+  const expV=x=>type==='call'?Math.max(x-K,0):Math.max(K-x,0);
+  let yMax=0; for(let x=xMin;x<=xMax;x+=2)yMax=Math.max(yMax,todayV(x),expV(x));
+  yMax*=1.08;
+  const X=x=>padL+(x-xMin)/(xMax-xMin)*pw, Y=y=>padT+(yMax-y)/yMax*ph;
+  ctx.strokeStyle=css('--border'); ctx.font='11px Segoe UI'; ctx.fillStyle=css('--muted');
+  for(let i=0;i<=5;i++){const v=yMax*i/5,yp=Y(v);
+    ctx.beginPath(); ctx.moveTo(padL,yp); ctx.lineTo(w-padR,yp); ctx.stroke();
+    ctx.textAlign='right'; ctx.fillText('$'+v.toFixed(0),padL-6,yp+4);}
+  for(let i=0;i<=6;i++){const xv=xMin+(xMax-xMin)*i/6;
+    ctx.textAlign='center'; ctx.fillText('$'+xv.toFixed(0),X(xv),h-10);}
+  // expiry payoff dashed
+  ctx.setLineDash([6,5]); ctx.strokeStyle=css('--muted'); ctx.lineWidth=2; ctx.beginPath();
+  for(let x=xMin;x<=xMax;x++){const v=expV(x); x===xMin?ctx.moveTo(X(x),Y(v)):ctx.lineTo(X(x),Y(v));}
+  ctx.stroke(); ctx.setLineDash([]);
+  // today's value curve
+  ctx.strokeStyle=css('--accent'); ctx.lineWidth=2.8; ctx.beginPath();
+  for(let x=xMin;x<=xMax;x++){const v=todayV(x); x===xMin?ctx.moveTo(X(x),Y(v)):ctx.lineTo(X(x),Y(v));}
+  ctx.stroke();
+  // strike line
+  ctx.setLineDash([2,4]); ctx.strokeStyle=css('--purple'); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(X(K),padT); ctx.lineTo(X(K),padT+ph); ctx.stroke(); ctx.setLineDash([]);
+  // current point + tangent (delta visual)
+  const px=X(S),py=Y(g.price);
+  ctx.strokeStyle=css('--amber'); ctx.lineWidth=1.6; ctx.setLineDash([4,3]);
+  const slope=(Y(g.price+g.delta)-py); // delta per $1 in pixel space
+  ctx.beginPath(); ctx.moveTo(X(S-12),py-slope*12); ctx.lineTo(X(S+12),py+slope*12); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(px,py,6,0,7); ctx.fillStyle=css('--amber'); ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  // legend
+  ctx.font='12px Segoe UI'; ctx.textAlign='left';
+  ctx.fillStyle=css('--accent'); ctx.fillText('━ value today',padL+8,padT+14);
+  ctx.fillStyle=css('--muted'); ctx.fillText('╌ value at expiration (intrinsic)',padL+8,padT+30);
+  ctx.fillStyle=css('--amber'); ctx.fillText('╱ tangent slope = delta',padL+8,padT+46);
+  // explanation
+  const tv=g.price-expV(S);
+  const moneyness=type==='call'?(S>K?'in the money':S<K?'out of the money':'at the money'):(S<K?'in the money':S>K?'out of the money':'at the money');
+  document.getElementById('greekExplain').innerHTML=
+    `This ${type} is <b>${moneyness}</b>, worth <b>$${g.price.toFixed(2)}</b> = $${expV(S).toFixed(2)} intrinsic + <b>$${Math.max(tv,0).toFixed(2)} time value</b> (the gap between the curves). `+
+    `If the stock moves +$1, the option moves ~<b>$${g.delta.toFixed(2)}</b> (delta). Each day that passes costs ~<b>$${Math.abs(g.theta).toFixed(3)}</b> (theta). `+
+    `If implied vol rises 1 point, it gains ~<b>$${g.vega.toFixed(3)}</b> (vega). Try setting days to 5 and watch theta explode and the curves converge.`;
+}
+['gType','gSpot','gStrike','gDays','gVol'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('input',drawGreeks);
+  el.addEventListener('change',drawGreeks);
+});
+
+/* ============ QUIZ ============ */
+const QUESTIONS=[
+ {q:'A call option gives the holder the right to…',o:['Sell a stock at the strike price','Buy a stock at the strike price','Receive dividends from the stock','Vote in shareholder meetings'],a:1,e:'A CALL = the right to BUY at the strike. Memory trick: you "call" the stock up to you.'},
+ {q:'A put option gives the holder the right to…',o:['Buy a stock at the strike price','Short any stock for free','Sell a stock at the strike price','Convert the option into shares'],a:2,e:'A PUT = the right to SELL at the strike — like insurance against a price drop.'},
+ {q:'You buy a call (strike $50, premium $3). What is your maximum possible loss?',o:['$50','$53','Unlimited','$3'],a:3,e:'Option BUYERS can only lose the premium paid — here, $3 per share. That\'s the beauty of buying options.'},
+ {q:'You buy a call (strike $50, premium $3). What is the breakeven stock price at expiry?',o:['$50','$53','$47','$3'],a:1,e:'Breakeven for a long call = strike + premium = $50 + $3 = $53. Below that, you lose money even if it\'s in the money.'},
+ {q:'You buy a put (strike $80, premium $4). The breakeven is…',o:['$84','$80','$76','$4'],a:2,e:'Long put breakeven = strike − premium = $80 − $4 = $76. The stock must fall below $76 for profit.'},
+ {q:'The stock trades at $95. A call with a $90 strike is…',o:['Out of the money','At the money','In the money','Expired'],a:2,e:'Call ITM when stock > strike. $95 > $90, so this call has $5 of intrinsic value.'},
+ {q:'The stock trades at $95. A put with a $90 strike is…',o:['In the money','Out of the money','At the money','Worth exactly $5'],a:1,e:'Put ITM when stock < strike. Stock $95 is ABOVE $90, so this put is out of the money.'},
+ {q:'Which position has UNLIMITED loss potential?',o:['Buying a call','Buying a put','Selling a naked call','Selling a put'],a:2,e:'A naked short call loses as the stock rises — and there\'s no ceiling on a stock price. Short puts lose a lot but max out when the stock hits $0.'},
+ {q:'What happens to an out-of-the-money option at expiration?',o:['It converts to stock','It expires worthless','It rolls to next month automatically','The buyer owes money'],a:1,e:'OTM at expiry = zero value. The buyer loses the premium; the seller keeps it.'},
+ {q:'An option premium is made of…',o:['Intrinsic value + time value','Strike price + stock price','Delta + gamma','Dividends + interest'],a:0,e:'Premium = intrinsic value (real value if exercised now) + time value (hope of improvement before expiry).'},
+ {q:'"Theta decay" means…',o:['Options gain value daily','Options lose value as time passes','The strike price drifts lower','Volatility always falls'],a:1,e:'Theta = daily time decay. Options are melting ice cubes — and they melt fastest in the final weeks.'},
+ {q:'Time decay is FASTEST…',o:['Right after you buy','When the option has years left','In the final weeks before expiration','Time decay is always constant'],a:2,e:'Decay accelerates near expiry. An ATM option loses value slowly at 6 months out, rapidly in the last 2-3 weeks.'},
+ {q:'Delta of 0.70 on a call roughly means…',o:['The option costs $0.70','The option gains ~$0.70 per $1 stock rise','70 days to expiry','The strike is 70% of stock price'],a:1,e:'Delta = price sensitivity per $1 stock move. Bonus: 0.70 also roughly implies ~70% chance of expiring ITM.'},
+ {q:'Which Greek measures sensitivity to implied volatility?',o:['Delta','Theta','Gamma','Vega'],a:3,e:'Vega = price change per 1% change in IV. Long options have positive vega — they gain when uncertainty rises.'},
+ {q:'A deep in-the-money call has a delta close to…',o:['0','0.5','1.0','−1.0'],a:2,e:'Deep ITM calls move almost 1-for-1 with the stock (delta ≈ 1) — they behave nearly like owning shares.'},
+ {q:'An at-the-money option has a delta close to…',o:['0','0.5 (calls) / −0.5 (puts)','1.0','It depends only on volatility'],a:1,e:'ATM ≈ coin flip on finishing ITM, so delta ≈ ±0.5.'},
+ {q:'Implied volatility typically rises…',o:['After earnings are announced','Before known uncertain events like earnings','When the market is calm','Only when stocks rise'],a:1,e:'IV rises into uncertain events (earnings, FDA decisions, elections) and usually collapses right after — "IV crush".'},
+ {q:'You buy a call before earnings. The stock rises 3%, but you LOSE money. Most likely cause?',o:['Theta turned positive','The strike changed','IV crush — implied volatility collapsed','Dividends were paid'],a:2,e:'Classic IV crush: the post-earnings volatility collapse (vega loss) outweighed the favorable stock move (delta gain).'},
+ {q:'A covered call means…',o:['Buying a call with insurance','Owning the stock and selling a call against it','Selling both a call and a put','Buying calls at two strikes'],a:1,e:'Covered call = own 100 shares + sell 1 call. You earn premium income but cap your upside at the strike.'},
+ {q:'A long straddle (buy call + put, same strike) profits when…',o:['The stock stays flat','The stock makes a BIG move in either direction','Only when the stock rises','Volatility falls'],a:1,e:'A straddle is a bet on movement, not direction. You paid two premiums, so you need a move bigger than both combined.'},
+ {q:'Who profits if a stock stays completely flat until expiration?',o:['Option buyers','Option sellers','Both equally','Neither'],a:1,e:'Flat stock = options expire near worthless = sellers keep the premiums. Theta works FOR sellers.'},
+ {q:'In a bull call spread you buy a $100 call and sell a $110 call for a net cost of $4. Max profit?',o:['Unlimited','$10','$6','$4'],a:2,e:'Max profit = spread width − net cost = (110−100) − 4 = $6, reached when the stock is at/above $110 at expiry.'},
+ {q:'One standard equity option contract typically controls…',o:['1 share','10 shares','100 shares','1,000 shares'],a:2,e:'1 contract = 100 shares. A premium quoted at $2.50 actually costs $250 per contract.'},
+ {q:'Selling a put is most similar to…',o:['Betting the stock will crash','Getting paid to promise to buy the stock at the strike','Buying insurance','Shorting the stock'],a:1,e:'A short put = obligation to buy at the strike if assigned. You collect premium for that promise — often used to enter stock cheaper.'},
+];
+let qPool=[],qIdx=0,qScore=0;
+const $=id=>document.getElementById(id);
+$('qStart').onclick=startQuiz;
+$('qRestart').onclick=startQuiz;
+function startQuiz(){
+  qPool=[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,10);
+  qIdx=0; qScore=0;
+  $('qStart').style.display='none'; $('quizIntro').style.display='none';
+  $('quizResult').style.display='none'; $('quizBody').style.display='block';
+  showQ();
+}
+function showQ(){
+  const q=qPool[qIdx];
+  $('qProg').style.width=(qIdx/qPool.length*100)+'%';
+  $('qCount').textContent=`Question ${qIdx+1} of ${qPool.length} · Score ${qScore}`;
+  $('qText').textContent=q.q;
+  $('qFeed').className='feedback'; $('qNext').style.display='none';
+  const box=$('qOpts'); box.innerHTML='';
+  q.o.forEach((opt,i)=>{
+    const b=document.createElement('button'); b.className='qopt'; b.textContent=opt;
+    b.onclick=()=>answer(i,b); box.appendChild(b);
+  });
+}
+function answer(i,btn){
+  const q=qPool[qIdx];
+  const buttons=$('qOpts').querySelectorAll('button');
+  buttons.forEach(b=>b.disabled=true);
+  buttons[q.a].classList.add('correct');
+  const f=$('qFeed');
+  if(i===q.a){qScore++; f.className='feedback ok'; f.innerHTML='✅ <b>Correct!</b> '+q.e;}
+  else{btn.classList.add('wrong'); f.className='feedback no'; f.innerHTML='❌ <b>Not quite.</b> '+q.e;}
+  $('qCount').textContent=`Question ${qIdx+1} of ${qPool.length} · Score ${qScore}`;
+  $('qNext').style.display='inline-block';
+  $('qNext').textContent=qIdx===qPool.length-1?'See results 🏁':'Next question →';
+}
+$('qNext').onclick=()=>{
+  qIdx++;
+  if(qIdx>=qPool.length){
+    $('quizBody').style.display='none'; $('quizResult').style.display='block';
+    const pct=Math.round(qScore/qPool.length*100);
+    $('qScore').textContent=qScore+' / '+qPool.length;
+    $('qScore').className='scorebig '+(pct>=80?'green':pct>=50?'amber':'red');
+    $('qVerdict').textContent=pct>=80?'🎓 Excellent — you\'ve got the fundamentals down!':pct>=50?'👍 Good progress — revisit the lessons on the ones you missed.':'📚 Keep going — re-read the lessons and play with the Payoff Lab, then try again.';
+  } else showQ();
+};
+
+/* init — redraw only what's visible (hidden canvases have zero width) */
+window.addEventListener('resize',()=>{
+  const t=document.querySelector('.tab.show'); if(!t)return;
+  if(t.id==='tab-learn')redrawActiveLesson();
+  else if(t.id==='tab-payoff')drawPayoff();
+  else if(t.id==='tab-greeks')drawGreeks();
+});
+drawDemoCall(); drawPayoff(); drawGreeks();
+</script>
+</body>
+</html>
